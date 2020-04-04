@@ -2,6 +2,7 @@
 
 1. First Clone the GitHub Repository:
 
+  git clone https://github.com/tejendrasingh/FullThrottle.git
 
 2. cd FullThrottle
 
