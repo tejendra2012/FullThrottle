@@ -1,42 +1,117 @@
 # FullThrottle
 
-1. First Clone the GitHub Repository:
+## Setup
 
-  git clone https://github.com/tejendrasingh/FullThrottle.git
+1. The first thing to do is to clone the repository:
 
-2. cd FullThrottle
+```sh
+$ git clone https://github.com/tejendrasingh/FullThrottle.git
+$ cd FullThrottle
+```
 
-3. Create python virtual envirnment with python3.
+2. Create a virtual environment to install dependencies in and activate it:
 
-  virtualenv -p /usr/bin/python3 <virtual-env-name>
+```sh
+$ virtualenv -p /usr/bin/python3 env
+$ source env/bin/activate
+```
 
-4. Activate virtual envirnment.
+3. Then install the dependencies:
 
-  source <virtual-env-name>/bin/activate
+```sh
+(env)$ pip install -r requirements.txt
+```
+Note the `(env)` in front of the prompt. This indicates that this terminal
+session operates in a virtual environment set up by `virtualenv`.
 
-5. Install django requirment package.
+Once `pip` has finished downloading the dependencies:
 
-  pip install requirments.txt
+4. Create database tables:
+```sh
+(env)$ python manage.py makemigrations core
+(env)$ python manage.py migrate
+```
+5. Insert dummy data using custom management command:
+```sh
+(env)$ python manage.py populatedata core/management/commands/users.csv core/management/commands/periods.csv
+```
 
-6. Create model tables.
+## Starting the web server
 
-  python manage.py makemigrations core
+1. Run python application:
+```sh
+(env)$ python manage.py runserver
+```
+Or
+```sh
+(env)$ python manage.py runserver 0.0.0.0:8080
+```
 
-  python manage.py migrate
+## Test the API using Curl Command:
 
-7.  Insert dummy data using custom management command
+1. Curl command to show all users detail:
+```sh
+(home)$ curl -X GET 'http://127.0.0.1:8000/api/v1/users'
+```
 
-  python manage.py populatedata
+## Response:
 
-8. Run python application.
+{
+  "ok": true,
+  "members": [{
+    "id": "W012A3CDE",
+    "real_name": "Egon Spengler",
+    "tz": "America/Los_Angeles",
+    "activity_periods": [{
+      "start_time": "Feb 01 2020 01:33PM",
+      "end_time": "Feb 01 2020 01:54PM"
+    }, {
+      "start_time": "Mar 01 2020 11:11AM",
+      "end_time": "Mar 01 2020 02:00PM"
+    }, {
+      "start_time": "Mar 16 2020 05:33PM",
+      "end_time": "Mar 16 2020 08:02PM"
+    }]
+  }, {
+    "id": "W07QCRPA4",
+    "real_name": "Glinda Southgood",
+    "tz": "Asia/Kolkata",
+    "activity_periods": [{
+      "start_time": "Feb 01 2020 01:33PM",
+      "end_time": "Feb 01 2020 01:54PM"
+    }, {
+      "start_time": "Mar 01 2020 11:11AM",
+      "end_time": "Mar 01 2020 02:00PM"
+    }, {
+      "start_time": "Mar 16 2020 05:33PM",
+      "end_time": "Mar 16 2020 08:02PM"
+    }]
+  }]
+}
 
-  python manage.py runserver
 
-9. Show all users details using these Curl command.
+Curl command to show Specific user detail using user_id:
+```sh
+(home)$ curl -X GET 'http://127.0.0.1:8000/api/v1/users/W012A3CDE'
+```
+## Response:
 
-  curl -X GET 'http://127.0.0.1:8000/api/v1/users'
-
-10. show specific user details with user_id using these Curl command.
-
-  curl - X GET 'http://127.0.0.1:8000/api/v1/users/W012A3CDE'
+{
+  "ok": true,
+  "members": [{
+    "id": "W012A3CDE",
+    "real_name": "Egon Spengler",
+    "tz": "America/Los_Angeles",
+    "activity_periods": [{
+      "start_time": "Feb 01 2020 01:33PM",
+      "end_time": "Feb 01 2020 01:54PM"
+    }, {
+      "start_time": "Mar 01 2020 11:11AM",
+      "end_time": "Mar 01 2020 02:00PM"
+    }, {
+      "start_time": "Mar 16 2020 05:33PM",
+      "end_time": "Mar 16 2020 08:02PM"
+    }]
+  }]
+}
 

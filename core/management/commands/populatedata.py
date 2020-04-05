@@ -1,7 +1,7 @@
 # main/management/commands/populatedata.py
 from datetime import datetime
 import random
-
+import csv
 from django.core.management.base import BaseCommand
 
 from core.models import CustomUser , ActivityPeriod
@@ -10,21 +10,28 @@ from core.models import CustomUser , ActivityPeriod
 class Command(BaseCommand):
     help = "Save randomly generated record values."
 
-    def handle(self, *args, **options):
+    def add_arguments(self, parser):
+        parser.add_argument('userPath', type=str, help='define path of users csv file.')
+        parser.add_argument('periodPath', type=str, help='Define path of periods csv file')
+
+    def handle(self, *args , **kwargs):
         records = []
-        user_id_list = ['W012A3CDE' , 'W07QCRPA4']
-        real_name_list = ['Egon Spengler', 'Glinda Southgood']
-        start_time_list = ['Feb 1 2020  1:33PM','Mar 1 2020  11:11AM' , 'Mar 16 2020  5:33PM']
-        end_time_list =  ['Feb 1 2020 1:54PM' , 'Mar 1 2020 2:00PM' , 'Mar 16 2020 8:02PM']
-        tz_list = ['America/Los_Angeles' , 'Asia/Kolkata']
-        for i in range(len(real_name_list)):
-            kwargs = {
-                'user_id':user_id_list[i],
-                'real_name': real_name_list[i],
-                'tz': tz_list[i]
-            }
-            record = CustomUser(**kwargs)
-            records.append(record)
+
+        usersPath = kwargs['userPath']
+        periodPath = kwargs['periodPath']
+        
+        with open(usersPath) as csv_file:
+            reader = csv.reader(csv_file,delimiter=',')
+            next(reader)
+
+            for user_data in reader:
+                kwargs = {
+                    'user_id':user_data[0],
+                    'real_name': user_data[1],
+                    'tz': user_data[2]
+                }
+                record = CustomUser(**kwargs)
+                records.append(record)
         CustomUser.objects.bulk_create(records)
         self.stdout.write(self.style.SUCCESS('User records saved successfully.'))
 
@@ -32,13 +39,17 @@ class Command(BaseCommand):
 
         periods = []
         for user in users:
-            for i in range(len(start_time_list)):
-                kwargs = {
-                    'member':user,
-                    'start_time':datetime.strptime(start_time_list[i], '%b %d %Y %I:%M%p'),
-                    'end_time': datetime.strptime(end_time_list[i], '%b %d %Y %I:%M%p')
-                }
-                period = ActivityPeriod(**kwargs)
-                periods.append(period)
+            with open(periodPath) as csv_file:
+                period_reader = csv.reader(csv_file,delimiter=',')
+                next(period_reader)
+
+                for period_data in period_reader:
+                    kwargs = {
+                        'member':user,
+                        'start_time':datetime.strptime(period_data[0], '%b %d %Y %I:%M%p'),
+                        'end_time': datetime.strptime(period_data[1], '%b %d %Y %I:%M%p')
+                    }
+                    period = ActivityPeriod(**kwargs)
+                    periods.append(period)
         ActivityPeriod.objects.bulk_create(periods)
         self.stdout.write(self.style.SUCCESS('Period records saved successfully.'))
